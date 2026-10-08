@@ -1,9 +1,31 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Founder's Field Guide</title>
+<script>
+  (function () {
+    var saved = localStorage.getItem('field-guide-theme');
+    var theme = saved ? saved : 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
 <style>
+:root {
+  color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body { margin: 0; padding: 0; font: 14px -apple-system, BlinkMacSystemFont, sans-serif; background: #faf9f5; color: #141413; }
+img { max-width: 100%; }
+[hidden]:not([hidden=until-found i]) { display: none !important; }
+
 /* Layout concept: a field manual. Sticky parts index on the left, one reading column on the right,
    every step built from the same parts: why, what to do, a script, an example, a finish line. */
 :root {
@@ -20,13 +42,7 @@
   --font-display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
   --font-body: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0D121E; --surface: #151B2B; --ink: #E8ECF4; --muted: #A3ADC2; --line: #2A3350;
-    --accent: #8EA3FF; --accent-ink: #0D121E; --soft: #1B2444; --mark: #5B4C00; --mark-ink: #FFF3B0;
-    color-scheme: dark;
-  }
+  color-scheme: light;
 }
 :root[data-theme="dark"] {
   --bg: #0D121E; --surface: #151B2B; --ink: #E8ECF4; --muted: #A3ADC2; --line: #2A3350;
@@ -45,6 +61,27 @@ mark { background: var(--mark); color: var(--mark-ink); padding: 0 3px; border-r
 
 /* top */
 .top { display: flex; flex-direction: column; gap: 18px; padding-block: 24px 36px; border-bottom: 1px solid var(--line); }
+.top-meta { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.theme-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
 .top .eyebrow { color: var(--accent); }
 .top h1 { font-size: clamp(2.2rem, 6vw, 3.9rem); font-weight: 800; letter-spacing: -0.02em; max-width: 16ch; }
 .top .sub { color: var(--muted); font-size: 1.15rem; max-width: 58ch; }
@@ -139,12 +176,18 @@ td:first-child { font-weight: 600; }
   .done { flex-direction: column; gap: 4px; }
   body { font-size: 16.5px; }
 }
-@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 </style>
+</head>
+<body>
 
 <div class="wrap">
   <div class="top">
-    <span class="mono eyebrow">EnactOn Technologies &middot; Founder's Field Guide</span>
+    <div class="top-meta">
+      <span class="mono eyebrow">EnactOn Technologies &middot; Founder's Field Guide</span>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle theme">
+        <span id="theme-icon">🌙</span> <span id="theme-label">Dark mode</span>
+      </button>
+    </div>
     <h1>How to get your first 100 customers</h1>
     <p class="sub">A step-by-step guide for people building software products. Fifteen steps, in order, and you do not need an ad budget to start. Each step tells you why it matters, what to do, what to say, and how to know you're done.</p>
   </div>
@@ -772,6 +815,33 @@ td:first-child { font-weight: 600; }
       });
     }, { rootMargin: '-15% 0px -70% 0px' });
     Object.keys(links).forEach(function (id) { var el = document.getElementById(id); if (el) io.observe(el); });
+  }
+
+  // theme toggle (default light)
+  var toggleBtn = document.getElementById('theme-toggle');
+  var themeIcon = document.getElementById('theme-icon');
+  var themeLabel = document.getElementById('theme-label');
+  function updateThemeUI(t) {
+    if (!toggleBtn) return;
+    if (t === 'dark') {
+      if (themeIcon) themeIcon.textContent = '☀️';
+      if (themeLabel) themeLabel.textContent = 'Light mode';
+    } else {
+      if (themeIcon) themeIcon.textContent = '🌙';
+      if (themeLabel) themeLabel.textContent = 'Dark mode';
+    }
+  }
+  var currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+  updateThemeUI(currentTheme);
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', function () {
+      var activeTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+      var newTheme = activeTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      try { localStorage.setItem('field-guide-theme', newTheme); } catch (e) {}
+      updateThemeUI(newTheme);
+    });
   }
 })();
 </script>
